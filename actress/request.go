@@ -78,6 +78,7 @@ func (r *Request) Request() (*http.Request, error) {
 
 var sizeRe = regexp.MustCompile(`^(?:-?[1-9]\d*|[1-9]\d*-[1-9]\d*)$`)
 var sortRe = regexp.MustCompile(`^-?(?:name|bust|waist|hip|height|birthday)$`)
+var initialRe = regexp.MustCompile(`^[ぁ-ん]$`)
 
 // Validate request parameters
 func (r *Request) Validate() error {
@@ -88,7 +89,14 @@ func (r *Request) Validate() error {
 		return fmt.Errorf("mandatory parameter 'AffiliateID' is not set")
 	}
 
-	// XXX check initial
+	if r.Initial != "" {
+		if len([]rune(r.Initial)) != 1 {
+			return fmt.Errorf("'Initial' pamaeter should be one character")
+		}
+		if !initialRe.MatchString(r.Initial) {
+			return fmt.Errorf("invalid 'Initial' parameter")
+		}
+	}
 
 	if r.Bust != "" && !sizeRe.MatchString(r.Bust) {
 		return fmt.Errorf("invalid 'Bust' parameter")
